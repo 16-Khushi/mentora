@@ -1,15 +1,35 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Fraunces, Geist_Mono, Knewave, Nunito } from "next/font/google"
 
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
-
-const fontMono = Geist_Mono({
+// Body and UI text: rounded and warm.
+const nunito = Nunito({
   subsets: ["latin"],
-  variable: "--font-mono",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-nunito",
+})
+
+// Headlines: a variable serif. SOFT rounds the corners, WONK (kept off) would add quirky letters,
+// opsz adjusts the letter shapes to the size they're shown at. See DESIGN.md section 3.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  axes: ["SOFT", "WONK", "opsz"],
+  variable: "--font-fraunces",
+})
+
+// The "Mentora" wordmark and Thena's name only: a thick, slanted brush lettering.
+const knewave = Knewave({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-knewave",
+})
+
+// Code blocks in lesson notes.
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
 })
 
 export const metadata: Metadata = {
@@ -25,17 +45,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      suppressHydrationWarning
       className={cn(
         "antialiased",
-        fontMono.variable,
-        "font-sans",
-        geist.variable
+        nunito.variable,
+        fraunces.variable,
+        knewave.variable,
+        geistMono.variable
       )}
     >
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
-      </body>
+      <body>{children}</body>
     </html>
   )
 }
