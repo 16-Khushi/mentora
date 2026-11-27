@@ -1,0 +1,14 @@
+import { neon } from "@neondatabase/serverless"
+import { drizzle } from "drizzle-orm/neon-http"
+
+import * as schema from "./schema"
+
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL is missing. Add it to .env.local (see .env.example)."
+  )
+}
+
+// Neon's HTTP driver: one HTTPS request per query, no connection pool to keep warm.
+// That suits serverless functions, which start and stop all the time.
+export const db = drizzle(neon(process.env.DATABASE_URL), { schema })
