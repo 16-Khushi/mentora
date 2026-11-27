@@ -8,9 +8,10 @@ import Wordmark from "@/components/wordmark"
 import { cn } from "@/lib/utils"
 
 import { APP_NAV, isActive } from "./app-nav"
+import UserCard, { type SidebarUser } from "./user-card"
 
 /** Left sidebar on desktop (lg and up). Phones get AppTabBar instead. */
-export default function AppSidebar() {
+export default function AppSidebar({ user }: { user: SidebarUser }) {
   const pathname = usePathname()
   return (
     <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-8 border-r border-line bg-sidebar px-4 py-6 lg:flex">
@@ -51,6 +52,7 @@ export default function AppSidebar() {
           A little every day beats a lot once.
         </p>
       </div>
+      <UserCard user={user} />
     </aside>
   )
 }
