@@ -6,10 +6,12 @@ import {
   Check,
   Clock,
   EllipsisVertical,
+  ListChecks,
   LogOut,
   Pencil,
   Share2,
 } from "lucide-react"
+import Link from "next/link"
 import { useOptimistic, useState, useTransition } from "react"
 import { toast } from "sonner"
 
@@ -30,10 +32,13 @@ export default function CourseMenu({
   slug,
   title,
   minutesPerDay,
+  placement,
 }: {
   slug: string
   title: string
   minutesPerDay: number
+  /** Whether the course has a placement test, and whether this learner took it. */
+  placement: { available: boolean; taken: boolean }
 }) {
   const [pace, setShownPace] = useOptimistic(minutesPerDay)
   const [, start] = useTransition()
@@ -148,6 +153,17 @@ export default function CourseMenu({
                 </Menu.Item>
               </Menu.Group>
               <Menu.Separator className="my-1.5 h-px bg-line" />
+              {placement.available && (
+                <Menu.Item
+                  render={<Link href={`/build/${slug}/test`} />}
+                  className={ITEM}
+                >
+                  <ListChecks className="size-4" aria-hidden />
+                  {placement.taken
+                    ? "Retake the placement test"
+                    : "Take the placement test"}
+                </Menu.Item>
+              )}
               <Menu.Item onClick={share} className={ITEM}>
                 <Share2 className="size-4" aria-hidden />
                 Share course

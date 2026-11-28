@@ -15,6 +15,20 @@
       "when": 1795800749806,
       "tag": "0001_structured_notes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795857710230,
+      "tag": "0002_placement_answers",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795860159766,
+      "tag": "0003_lesson_notes",
+      "breakpoints": true
     }
   ]
 }

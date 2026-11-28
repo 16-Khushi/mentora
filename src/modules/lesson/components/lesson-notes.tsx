@@ -77,16 +77,16 @@ export default function LessonNotesView({
   }
 
   return (
-    <article className="flex flex-col gap-8" aria-label="Lesson notes">
+    <article className="flex flex-col gap-6" aria-label="Lesson notes">
       <div className="flex items-start gap-4">
         <Mascot
           pose="reading"
           size={72}
-          className="hidden w-16 shrink-0 sm:block"
+          className="hidden w-12 shrink-0 sm:block"
         />
         <div className="flex flex-col gap-1">
           <p className="eyebrow text-plum">In this lesson</p>
-          <p className="max-w-[62ch] type-lead text-slate">
+          <p className="max-w-[66ch] text-[1.05rem] leading-relaxed text-slate">
             <Inline text={notes.overview} />
           </p>
         </div>
@@ -95,11 +95,11 @@ export default function LessonNotesView({
       {notes.sections.map((s, i) => (
         <section
           key={i}
-          className="flex flex-col gap-3 border-t border-line pt-7 first-of-type:border-0 first-of-type:pt-0"
+          className="flex flex-col gap-2.5 border-t border-line pt-5 first-of-type:border-0 first-of-type:pt-0"
         >
-          <h3 className="flex items-center gap-3 type-h3 text-ink">
+          <h3 className="flex items-center gap-2.5 font-heading text-xl leading-snug text-ink">
             <span
-              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-lavender text-sm font-bold"
+              className="flex size-7 shrink-0 items-center justify-center rounded-full bg-lavender font-sans text-xs font-bold"
               aria-hidden
             >
               {i + 1}
@@ -110,7 +110,7 @@ export default function LessonNotesView({
             {s.points.map((p, k) => (
               <li
                 key={k}
-                className="relative type-reading max-w-[66ch] pl-6 text-slate before:absolute before:top-[0.7em] before:left-1 before:size-2 before:rounded-full before:bg-violet"
+                className="relative max-w-[66ch] pl-6 text-[0.98rem] leading-relaxed text-slate before:absolute before:top-[0.7em] before:left-1 before:size-2 before:rounded-full before:bg-violet"
               >
                 <Inline text={p} />
               </li>
@@ -146,7 +146,7 @@ export default function LessonNotesView({
         </section>
       ))}
 
-      <aside className="flex flex-col gap-3 rounded-card bg-lavender p-5 sm:p-6">
+      <aside className="flex flex-col gap-3 rounded-tile bg-lavender p-4 sm:p-5">
         <p className="text-xs font-bold tracking-wider text-ink uppercase">
           Key terms
         </p>
@@ -164,7 +164,7 @@ export default function LessonNotesView({
         </dl>
       </aside>
 
-      <aside className="flex flex-col gap-3 rounded-card bg-mint p-5 sm:p-6">
+      <aside className="flex flex-col gap-3 rounded-tile bg-mint p-4 sm:p-5">
         <p className="text-xs font-bold tracking-wider text-ink uppercase">
           Remember
         </p>

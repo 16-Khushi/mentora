@@ -313,7 +313,31 @@ export const placementResults = pgTable(
       .$type<string[]>()
       .default([])
       .notNull(),
+    /** What was picked for each question (question id → option index, -1 for "I don't know"), for the review. */
+    answers: jsonb("answers")
+      .$type<Record<string, number>>()
+      .default({})
+      .notNull(),
     takenAt: createdAt(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.courseId] })]
+)
+
+/** A learner's own note on a lesson, pinned to a moment of the video ("My notes"). */
+export const lessonNotes = pgTable(
+  "lesson_note",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    lessonId: uuid("lesson_id")
+      .notNull()
+      .references(() => lessons.id, { onDelete: "cascade" }),
+    /** The moment it's pinned to, in seconds of the whole video. */
+    seconds: integer("seconds").notNull(),
+    body: text("body").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("lesson_note_user_lesson_idx").on(t.userId, t.lessonId)]
 )

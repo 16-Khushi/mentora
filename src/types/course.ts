@@ -1,5 +1,12 @@
 import type { Tone } from "@/types/design"
 
+/** One day of the plan. */
+export type CourseDay = {
+  day: number
+  minutes: number
+  lessons: CourseLesson[]
+}
+
 /** One lesson as the course page lists it. */
 export type CourseLesson = {
   position: number
@@ -22,7 +29,12 @@ export type CoursePageData = {
   minutesPerDay: number
   lessons: CourseLesson[]
   /** The lessons in the learner's plan (not skipped), grouped into days. */
-  days: { day: number; minutes: number; lessons: CourseLesson[] }[]
+  days: CourseDay[]
+  /** Every lesson, skipped ones included, grouped into days ("Full course"). */
+  fullDays: CourseDay[]
+  /** Lessons the placement test removed, and the study time that saves. */
+  skippedCount: number
+  minutesSaved: number
   /** The first day that still has an unfinished lesson (null when everything is done). */
   today: number | null
   /** The next lesson to study (null when finished). */

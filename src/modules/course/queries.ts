@@ -13,7 +13,7 @@ import {
   videos,
 } from "@/db/schema"
 import { DEFAULT_PACE, packDays, studyMinutes } from "@/lib/pace"
-import type { CourseLesson, CoursePageData } from "@/types/course"
+import type { CourseDay, CourseLesson, CoursePageData } from "@/types/course"
 
 /**
  * Everything the course page shows for one learner. Joining is implicit: opening a course
@@ -105,19 +105,9 @@ export async function getCoursePage(
   }))
   const plan = all.filter((l) => !l.skipped)
   const minutesPerDay = user?.minutesPerDay ?? DEFAULT_PACE
-  const dayOf = packDays(
-    plan.map((l) => l.minutes),
-    minutesPerDay
-  )
-
-  const days: CoursePageData["days"] = []
-  plan.forEach((lesson, i) => {
-    const day = dayOf[i]
-    let group = days.find((d) => d.day === day)
-    if (!group) days.push((group = { day, minutes: 0, lessons: [] }))
-    group.lessons.push(lesson)
-    group.minutes += lesson.minutes
-  })
+  const days = groupDays(plan, minutesPerDay)
+  const fullDays = groupDays(all, minutesPerDay)
+  const skipped = all.filter((l) => l.skipped)
 
   const next = plan.find((l) => !l.done) ?? null
   return {
@@ -129,10 +119,29 @@ export async function getCoursePage(
     minutesPerDay,
     lessons: all,
     days,
+    fullDays,
+    skippedCount: skipped.length,
+    minutesSaved: skipped.reduce((sum, l) => sum + l.minutes, 0),
     today: days.find((d) => d.lessons.some((l) => !l.done))?.day ?? null,
     next,
     doneCount: plan.filter((l) => l.done).length,
     planCount: plan.length,
     placement: { available: (placement?.n ?? 0) > 0, taken: Boolean(result) },
   }
+}
+
+/** Lessons (in order) packed into days that fit the learner's minutes per day. */
+function groupDays(list: CourseLesson[], minutesPerDay: number): CourseDay[] {
+  const dayOf = packDays(
+    list.map((l) => l.minutes),
+    minutesPerDay
+  )
+  const days: CourseDay[] = []
+  list.forEach((lesson, i) => {
+    let group = days.find((d) => d.day === dayOf[i])
+    if (!group) days.push((group = { day: dayOf[i], minutes: 0, lessons: [] }))
+    group.lessons.push(lesson)
+    group.minutes += lesson.minutes
+  })
+  return days
 }

@@ -1,20 +1,26 @@
 "use client"
 
-import { Check, RotateCcw, X } from "lucide-react"
+import { Check, Play, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
 import Mascot from "@/components/mascot"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { LessonQuestion } from "@/types/lesson"
 
 import { saveQuiz } from "../actions"
 
+/** Older lessons were written saying "the transcript"; learners only see the video. */
+const asVideo = (text: string) =>
+  text
+    .replace(/\bthe transcript\b/g, "the video")
+    .replace(/\bThe transcript\b/g, "The video")
+    .replace(/\btranscript\b/gi, "video")
+
 const clock = (s: number) =>
   `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`
 
 /**
- * The lesson's quiz. Answers show right or wrong straight away with the explanation; a wrong
+ * The lesson's quiz (shown in a modal from Study tools). Answers show right or wrong straight away with the explanation; a wrong
  * answer offers "Replay the moment", which jumps the video to where the idea is taught.
  * Answering every question saves the score and marks the lesson done.
  */
@@ -22,11 +28,14 @@ export default function LessonQuiz({
   lessonId,
   questions,
   previous,
+  start,
   onReplay,
 }: {
   lessonId: string
   questions: LessonQuestion[]
   previous: { correct: number; total: number } | null
+  /** The lesson's start in the video, so replay times read from the lesson's 0:00. */
+  start: number
   onReplay: (seconds: number) => void
 }) {
   const [answers, setAnswers] = useState<Record<string, number>>({})
@@ -51,19 +60,14 @@ export default function LessonQuiz({
   if (!questions.length) return null
 
   return (
-    <section className="flex flex-col gap-6" aria-labelledby="quiz-title">
-      <div className="flex flex-col gap-1">
-        <p className="eyebrow text-plum">Check it stuck</p>
-        <h2 id="quiz-title" className="type-h2 text-ink">
-          Quiz
-        </h2>
-        <p className="text-slate-muted">
-          {questions.length} questions.
-          {previous && ` Last time: ${previous.correct} of ${previous.total}.`}
+    <div className="flex flex-col gap-4">
+      {previous && (
+        <p className="text-sm text-slate-muted">
+          Last time: {previous.correct} of {previous.total}.
         </p>
-      </div>
+      )}
 
-      <ol className="flex flex-col gap-5">
+      <ol className="flex flex-col gap-3">
         {questions.map((q, i) => {
           const picked = answers[q.id]
           const done = picked !== undefined
@@ -71,14 +75,14 @@ export default function LessonQuiz({
           return (
             <li
               key={q.id}
-              className="flex flex-col gap-3 rounded-card bg-paper p-5 sm:p-6"
+              className="flex flex-col gap-2.5 rounded-tile border border-line bg-paper p-4"
             >
-              <p className="type-h4 text-ink">
-                <span className="mr-2 text-violet">{i + 1}.</span>
+              <p className="font-semibold text-ink">
+                <span className="mr-1.5 text-violet">{i + 1}.</span>
                 {q.prompt}
               </p>
               <div
-                className="flex flex-col gap-2"
+                className="flex flex-col gap-1.5"
                 role="radiogroup"
                 aria-label={`Question ${i + 1}`}
               >
@@ -94,7 +98,7 @@ export default function LessonQuiz({
                       disabled={done}
                       onClick={() => choose(q, k)}
                       className={cn(
-                        "flex items-center gap-3 rounded-tile border px-4 py-3 text-left transition-colors focus-visible:ring-3 focus-visible:ring-violet/40 focus-visible:outline-none",
+                        "flex items-center gap-2.5 rounded-control border px-3.5 py-2.5 text-left text-sm transition-colors focus-visible:ring-3 focus-visible:ring-violet/40 focus-visible:outline-none",
                         !done &&
                           "cursor-pointer border-line bg-paper hover:border-violet hover:bg-lavender/40",
                         done &&
@@ -112,13 +116,13 @@ export default function LessonQuiz({
                     >
                       {done && isAnswer && (
                         <Check
-                          className="size-5 shrink-0 text-teal-deep"
+                          className="size-4 shrink-0 text-teal-deep"
                           aria-label="Right answer"
                         />
                       )}
                       {done && isPicked && !isAnswer && (
                         <X
-                          className="size-5 shrink-0 text-coral-deep"
+                          className="size-4 shrink-0 text-coral-deep"
                           aria-label="Your answer"
                         />
                       )}
@@ -129,29 +133,43 @@ export default function LessonQuiz({
               </div>
               {done && (
                 <div
-                  className={cn(
-                    "flex animate-in flex-col gap-3 rounded-tile px-4 py-3 fade-in sm:flex-row sm:items-center sm:justify-between",
-                    right ? "bg-mint/50" : "bg-blush/60"
-                  )}
                   role="status"
-                >
-                  <p className="text-slate">
-                    <strong className="text-ink">
-                      {right ? "Right. " : "Not quite. "}
-                    </strong>
-                    {q.explanation}
-                  </p>
-                  {!right && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0"
-                      onClick={() => onReplay(q.replaySeconds)}
-                    >
-                      <RotateCcw aria-hidden />
-                      Replay the moment ({clock(q.replaySeconds)})
-                    </Button>
+                  className={cn(
+                    "flex animate-in flex-col gap-1.5 rounded-r-control border-l-[3px] py-2.5 pr-3 pl-3.5 fade-in",
+                    right
+                      ? "border-teal bg-mint/35"
+                      : "border-coral bg-blush/40"
                   )}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span
+                      className={cn(
+                        "flex items-center gap-1.5 text-sm font-bold",
+                        right ? "text-teal-deep" : "text-coral-deep"
+                      )}
+                    >
+                      {right ? (
+                        <Check className="size-4" strokeWidth={3} aria-hidden />
+                      ) : (
+                        <X className="size-4" strokeWidth={3} aria-hidden />
+                      )}
+                      {right ? "Right" : "Not quite"}
+                    </span>
+                    {!right && (
+                      <button
+                        type="button"
+                        onClick={() => onReplay(q.replaySeconds)}
+                        aria-label={`Rewatch this part, from ${clock(q.replaySeconds - start)}`}
+                        className="flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-paper px-2.5 text-xs font-bold text-ink shadow-sm ring-1 ring-line transition-colors hover:bg-ink hover:text-white focus-visible:ring-3 focus-visible:ring-violet/40 focus-visible:outline-none"
+                      >
+                        <Play className="size-3 fill-current" aria-hidden />
+                        Rewatch {clock(q.replaySeconds - start)}
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-sm leading-relaxed text-slate">
+                    {asVideo(q.explanation)}
+                  </p>
                 </div>
               )}
             </li>
@@ -161,19 +179,19 @@ export default function LessonQuiz({
 
       {finished && (
         <div
-          className="flex animate-in items-center gap-5 rounded-card bg-mint p-5 fade-in sm:p-6"
+          className="flex animate-in items-center gap-4 rounded-tile bg-mint p-4 fade-in"
           role="status"
         >
           <Mascot
             pose={correct === questions.length ? "celebrate" : "reading"}
-            size={88}
-            className="w-20 shrink-0"
+            size={64}
+            className="w-14 shrink-0"
           />
           <div className="flex flex-col gap-1">
-            <p className="type-h3 text-ink">
+            <p className="type-h4 text-ink">
               {correct} of {questions.length} right
             </p>
-            <p className="text-slate">
+            <p className="text-sm text-slate">
               {correct === questions.length
                 ? "Perfect. This lesson is done."
                 : "Lesson done. Replay the moments you missed whenever you like."}
@@ -181,6 +199,6 @@ export default function LessonQuiz({
           </div>
         </div>
       )}
-    </section>
+    </div>
   )
 }

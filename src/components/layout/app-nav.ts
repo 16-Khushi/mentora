@@ -1,8 +1,8 @@
-import { Library, Plus, Settings, Sun } from "lucide-react"
+import { House, Library, Plus, Settings } from "lucide-react"
 
 /** The signed-in app's sections, shared by the desktop sidebar and the phone tab bar. */
 export const APP_NAV = [
-  { href: "/dashboard", label: "Today", icon: Sun },
+  { href: "/dashboard", label: "Today", icon: House },
   { href: "/new", label: "New course", icon: Plus },
   { href: "/courses", label: "My courses", icon: Library },
   { href: "/settings", label: "Settings", icon: Settings },

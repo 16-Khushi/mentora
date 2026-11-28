@@ -1,15 +1,34 @@
 import { LogOut } from "lucide-react"
 import Image from "next/image"
 
+import { cn } from "@/lib/utils"
 import { signOutAction } from "@/modules/login/actions"
 
 export type SidebarUser = { name: string; email: string; image: string | null }
 
-/** Who is signed in, with a sign-out button. Sits at the bottom of the app sidebar. */
-export default function UserCard({ user }: { user: SidebarUser }) {
+/**
+ * Who is signed in, with a sign-out button. Sits at the bottom of the app sidebar; `compact`
+ * (collapsed sidebar) stacks the avatar over the sign-out button.
+ */
+export default function UserCard({
+  user,
+  compact = false,
+  className,
+}: {
+  user: SidebarUser
+  compact?: boolean
+  className?: string
+}) {
   const initial = user.name.trim().charAt(0).toUpperCase() || "M"
   return (
-    <div className="flex items-center gap-3 rounded-tile bg-paper p-3">
+    <div
+      title={compact ? `${user.name} · ${user.email}` : undefined}
+      className={cn(
+        "flex items-center rounded-tile bg-paper",
+        compact ? "flex-col gap-2 p-2" : "gap-3 p-3",
+        className
+      )}
+    >
       {user.image ? (
         <Image
           src={user.image}
@@ -26,10 +45,16 @@ export default function UserCard({ user }: { user: SidebarUser }) {
           {initial}
         </span>
       )}
-      <div className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate text-sm font-bold text-ink">{user.name}</span>
-        <span className="truncate text-xs text-slate-muted">{user.email}</span>
-      </div>
+      {!compact && (
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate text-sm font-bold text-ink">
+            {user.name}
+          </span>
+          <span className="truncate text-xs text-slate-muted">
+            {user.email}
+          </span>
+        </div>
+      )}
       <form action={signOutAction}>
         <button
           type="submit"

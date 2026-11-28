@@ -315,3 +315,68 @@ export async function fetchCourseSource(
     skipped,
   }
 }
+
+/** The creator behind a video, for the lesson page's creator card. */
+export type Channel = {
+  title: string
+  avatarUrl: string | null
+  /** null when the channel hides its subscriber count. */
+  subscribers: number | null
+  url: string
+}
+
+/**
+ * Looks up a video's channel: name, avatar and subscriber count. Cached for a day per video, so
+ * lesson pages don't spend API quota on every visit. Null if YouTube can't be reached.
+ */
+export async function fetchChannelForVideo(
+  videoId: string
+): Promise<Channel | null> {
+  const key = process.env.YOUTUBE_API_KEY
+  if (!key) return null
+  const get = async <T>(path: string, params: Record<string, string>) => {
+    const qs = new URLSearchParams({ ...params, key })
+    const res = await fetch(
+      `https://www.googleapis.com/youtube/v3/${path}?${qs}`,
+      { next: { revalidate: 86_400 } }
+    )
+    return res.ok ? ((await res.json()) as T) : null
+  }
+  try {
+    const video = await get<{ items?: { snippet: { channelId: string } }[] }>(
+      "videos",
+      { part: "snippet", id: videoId, fields: "items(snippet(channelId))" }
+    )
+    const channelId = video?.items?.[0]?.snippet.channelId
+    if (!channelId) return null
+    const channel = await get<{
+      items?: {
+        snippet: {
+          title: string
+          customUrl?: string
+          thumbnails: Record<string, { url: string }>
+        }
+        statistics: {
+          subscriberCount?: string
+          hiddenSubscriberCount?: boolean
+        }
+      }[]
+    }>("channels", { part: "snippet,statistics", id: channelId })
+    const c = channel?.items?.[0]
+    if (!c) return null
+    const t = c.snippet.thumbnails
+    return {
+      title: c.snippet.title,
+      avatarUrl: (t.medium ?? t.default ?? t.high)?.url ?? null,
+      subscribers:
+        c.statistics.hiddenSubscriberCount || !c.statistics.subscriberCount
+          ? null
+          : Number(c.statistics.subscriberCount),
+      url: c.snippet.customUrl
+        ? `https://www.youtube.com/${c.snippet.customUrl}`
+        : `https://www.youtube.com/channel/${channelId}`,
+    }
+  } catch {
+    return null
+  }
+}

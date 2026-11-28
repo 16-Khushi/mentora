@@ -21,6 +21,12 @@ export async function generateMetadata({
 
 export default function Page({
   params,
+  searchParams,
 }: PageProps<"/courses/[slug]/[lesson]">) {
-  return <LessonPage params={params} />
+  return (
+    <LessonPage
+      params={params}
+      searchParams={searchParams as Promise<{ autoplay?: string }>}
+    />
+  )
 }

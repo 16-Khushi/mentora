@@ -1,3 +1,5 @@
+import type { Channel } from "@/lib/youtube"
+
 /**
  * A lesson's study notes, as structure rather than free text. The AI fills these fields, our
  * checks enforce the limits, and the lesson page lays them out the same way every time, so
@@ -42,8 +44,29 @@ export type LessonQuestion = {
 }
 
 /** Everything the lesson page needs. */
+/** One lesson in the lesson page's side list. */
+export type OutlineLesson = {
+  position: number
+  title: string
+  /** The video's length in minutes. */
+  minutes: number
+  done: boolean
+  skipped: boolean
+  thumbnailUrl: string | null
+}
+
+/** The course's lessons grouped into the learner's plan days, for the side list's Day tabs. */
+export type LessonOutline = {
+  days: { day: number; lessons: OutlineLesson[] }[]
+  doneCount: number
+  total: number
+}
+
+/** One of the learner's own notes, pinned to a moment (seconds of the whole video). */
+export type MyNote = { id: string; seconds: number; body: string }
+
 export type LessonPageData = {
-  course: { slug: string; title: string }
+  course: { slug: string; title: string; channel: string | null }
   lesson: {
     id: string
     position: number
@@ -66,4 +89,8 @@ export type LessonPageData = {
     quizCorrect: number | null
     quizTotal: number | null
   }
+  outline: LessonOutline
+  /** The video's creator (null if YouTube couldn't be reached). */
+  creator: Channel | null
+  myNotes: MyNote[]
 }

@@ -20,6 +20,7 @@ export async function setPace(minutes: number) {
     .where(eq(users.id, session.user.id))
   revalidatePath("/courses", "layout")
   revalidatePath("/dashboard")
+  revalidatePath("/settings")
 }
 
 /**

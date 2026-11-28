@@ -41,6 +41,7 @@ export default async function CoursePage({
             slug={data.slug}
             title={data.title}
             minutesPerDay={data.minutesPerDay}
+            placement={data.placement}
           />
         </div>
         <Thumbnail

@@ -307,3 +307,14 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* A ticket: a rounded card with a half-circle notch cut into each side (the Today stats). */
+@utility ticket {
+  border-radius: var(--radius-card);
+  --notch: 14px;
+  mask:
+    radial-gradient(circle var(--notch) at 0 55%, transparent 98%, #000) left /
+      51% 100% no-repeat,
+    radial-gradient(circle var(--notch) at 100% 55%, transparent 98%, #000)
+      right / 51% 100% no-repeat;
+}

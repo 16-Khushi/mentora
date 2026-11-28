@@ -1,0 +1,1 @@
+ALTER TABLE "placement_result" ADD COLUMN "answers" jsonb DEFAULT '{}'::jsonb NOT NULL;

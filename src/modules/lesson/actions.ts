@@ -1,11 +1,10 @@
 "use server"
 
-import { sql } from "drizzle-orm"
-import { eq } from "drizzle-orm"
+import { and, eq, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 
 import { db } from "@/db"
-import { lessonProgress, lessons } from "@/db/schema"
+import { lessonNotes, lessonProgress, lessons } from "@/db/schema"
 import { auth } from "@/lib/auth"
 
 /** Share of a lesson that counts as watched. */
@@ -83,4 +82,62 @@ export async function saveQuiz(
     })
   revalidatePath("/courses", "layout")
   revalidatePath("/dashboard")
+}
+
+/**
+ * "Mark as completed" (or undo it): for lessons the learner finished some other way, like
+ * reading the notes or watching on YouTube. Watch time is left as it is.
+ */
+export async function setLessonDone(lessonId: string, done: boolean) {
+  const session = await auth()
+  const userId = session?.user?.id
+  if (!userId) return
+  const completedAt = done ? new Date() : null
+  await db
+    .insert(lessonProgress)
+    .values({ userId, lessonId, completedAt })
+    .onConflictDoUpdate({
+      target: [lessonProgress.userId, lessonProgress.lessonId],
+      set: { completedAt, updatedAt: new Date() },
+    })
+  revalidatePath("/courses", "layout")
+  revalidatePath("/dashboard")
+}
+
+const NOTE_MAX = 2000
+
+/** "My notes": saves a note pinned to a moment of the video. Returns the saved note. */
+export async function addLessonNote(
+  lessonId: string,
+  seconds: number,
+  body: string
+) {
+  const session = await auth()
+  const userId = session?.user?.id
+  const text = body.trim().slice(0, NOTE_MAX)
+  if (!userId || !text) return null
+  const [note] = await db
+    .insert(lessonNotes)
+    .values({
+      userId,
+      lessonId,
+      seconds: Math.max(0, Math.round(seconds)),
+      body: text,
+    })
+    .returning({
+      id: lessonNotes.id,
+      seconds: lessonNotes.seconds,
+      body: lessonNotes.body,
+    })
+  return note
+}
+
+/** Deletes one of the learner's own notes. */
+export async function deleteLessonNote(id: string) {
+  const session = await auth()
+  const userId = session?.user?.id
+  if (!userId) return
+  await db
+    .delete(lessonNotes)
+    .where(and(eq(lessonNotes.id, id), eq(lessonNotes.userId, userId)))
 }
