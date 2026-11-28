@@ -11,6 +11,8 @@ import {
   uuid,
 } from "drizzle-orm/pg-core"
 
+import type { LessonNotes } from "@/types/lesson"
+
 /*
  * Mentora's database, in four groups:
  *   1. Auth.js        who you are (filled in by Auth.js when you sign in with Google)
@@ -187,8 +189,8 @@ export const lessons = pgTable(
     title: text("title").notNull(),
     /** One or two sentences from the lesson plan. */
     summary: text("summary").notNull(),
-    /** Markdown study notes. Empty until the lesson is written. */
-    notes: text("notes"),
+    /** Structured study notes (see src/types/lesson.ts). Empty until the lesson is written. */
+    notes: jsonb("notes").$type<LessonNotes>(),
     /** Set when notes and quiz are written; the build screen counts these. */
     writtenAt: timestamp("written_at", { mode: "date" }),
   },

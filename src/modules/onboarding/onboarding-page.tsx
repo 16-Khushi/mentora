@@ -1,10 +1,16 @@
-import PagePlaceholder from "@/components/page-placeholder"
+import { notFound } from "next/navigation"
 
+import BuildScreen from "./components/build-screen"
+import { getBuildState } from "./queries"
+
+/** /build/<slug>: the live build screen, or what to do next once the course is ready. */
 export default async function OnboardingPage({
   params,
 }: {
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  return <PagePlaceholder title="Building your course" note={`slug: ${slug}`} />
+  const state = await getBuildState(slug)
+  if (!state) notFound()
+  return <BuildScreen initial={state} />
 }

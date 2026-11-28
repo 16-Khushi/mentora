@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Fraunces, Geist_Mono, Knewave, Nunito } from "next/font/google"
 
 import "./globals.css"
+import Toaster from "@/components/toaster"
 import { cn } from "@/lib/utils"
 
 // Body and UI text: rounded and warm.
@@ -53,7 +54,10 @@ export default function RootLayout({
         geistMono.variable
       )}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <Toaster />
+      </body>
     </html>
   )
 }

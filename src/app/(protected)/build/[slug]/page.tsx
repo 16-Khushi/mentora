@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+
 import OnboardingPage from "@/modules/onboarding/onboarding-page"
 
 export const metadata: Metadata = { title: "Building your course" }
